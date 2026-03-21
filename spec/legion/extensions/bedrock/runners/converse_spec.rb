@@ -110,5 +110,75 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Converse do
         secret_access_key: secret_access_key
       )
     end
+
+    it 'defaults max_tokens to 1024 when not specified' do
+      allow(runtime_double).to receive(:converse)
+        .with(hash_including(inference_config: hash_including(max_tokens: 1024)))
+        .and_return(converse_response)
+
+      instance.create(
+        model_id:          model_id,
+        messages:          messages,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+    end
+
+    it 'forwards the region to Helpers::Client' do
+      expect(Legion::Extensions::Bedrock::Helpers::Client)
+        .to receive(:bedrock_runtime_client)
+        .with(hash_including(region: 'ap-southeast-1'))
+        .and_return(runtime_double)
+
+      instance.create(
+        model_id:          model_id,
+        messages:          messages,
+        region:            'ap-southeast-1',
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+    end
+
+    it 'forwards access_key_id and secret_access_key to Helpers::Client' do
+      expect(Legion::Extensions::Bedrock::Helpers::Client)
+        .to receive(:bedrock_runtime_client)
+        .with(hash_including(
+                access_key_id:     access_key_id,
+                secret_access_key: secret_access_key
+              ))
+        .and_return(runtime_double)
+
+      instance.create(
+        model_id:          model_id,
+        messages:          messages,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+    end
+
+    it 'returns the usage object from the response' do
+      result = instance.create(
+        model_id:          model_id,
+        messages:          messages,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+      expect(result[:usage].input_tokens).to eq(10)
+      expect(result[:usage].output_tokens).to eq(20)
+    end
+
+    it 'does not include temperature in inference_config when temperature is nil' do
+      allow(runtime_double).to receive(:converse) do |kwargs|
+        expect(kwargs[:inference_config]).not_to have_key(:temperature)
+        converse_response
+      end
+
+      instance.create(
+        model_id:          model_id,
+        messages:          messages,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+    end
   end
 end

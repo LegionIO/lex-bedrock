@@ -77,5 +77,52 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Invoke do
         secret_access_key: secret_access_key
       )
     end
+
+    it 'serializes body hash to JSON string before sending' do
+      allow(runtime_double).to receive(:invoke_model) do |kwargs|
+        expect(kwargs[:body]).to be_a(String)
+        expect(JSON.parse(kwargs[:body])).to eq('prompt' => 'Hello', 'max_tokens_to_sample' => 256)
+        invoke_response
+      end
+
+      instance.invoke_model(
+        model_id:          model_id,
+        body:              body,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+    end
+
+    it 'forwards the region to Helpers::Client' do
+      expect(Legion::Extensions::Bedrock::Helpers::Client)
+        .to receive(:bedrock_runtime_client)
+        .with(hash_including(region: 'us-west-2'))
+        .and_return(runtime_double)
+
+      instance.invoke_model(
+        model_id:          model_id,
+        body:              body,
+        region:            'us-west-2',
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+    end
+
+    it 'forwards access_key_id and secret_access_key to Helpers::Client' do
+      expect(Legion::Extensions::Bedrock::Helpers::Client)
+        .to receive(:bedrock_runtime_client)
+        .with(hash_including(
+                access_key_id:     access_key_id,
+                secret_access_key: secret_access_key
+              ))
+        .and_return(runtime_double)
+
+      instance.invoke_model(
+        model_id:          model_id,
+        body:              body,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+    end
   end
 end
