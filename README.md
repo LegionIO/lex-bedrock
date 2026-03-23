@@ -1,6 +1,10 @@
 # lex-bedrock
 
-Legion Extension (LEX) that connects LegionIO to AWS Bedrock for foundation model inference.
+Legion Extension that connects LegionIO to AWS Bedrock for foundation model inference.
+
+## Purpose
+
+Wraps the AWS Bedrock SDK as named runners consumable by any LegionIO task chain. Provides the Converse API (multi-turn chat), raw InvokeModel (direct model invocation), and foundation model listing. Uses the AWS SDK directly — no Faraday. Use this extension when you need direct access to the Bedrock API surface within the LEX runner/actor lifecycle. For simple chat/embed workflows, consider `legion-llm` instead.
 
 ## Installation
 
@@ -56,6 +60,20 @@ include Legion::Extensions::Bedrock::Runners::Models
 include Legion::Extensions::Bedrock::Runners::Converse
 include Legion::Extensions::Bedrock::Runners::Invoke
 ```
+
+## API Coverage
+
+| Runner | Methods |
+|--------|---------|
+| `Converse` | `create` |
+| `Invoke` | `invoke_model` |
+| `Models` | `list`, `get` |
+
+## Related
+
+- `lex-claude` — Direct Anthropic API client (bypasses Bedrock)
+- `legion-llm` — High-level LLM interface including Bedrock via ruby_llm
+- `extensions-ai/CLAUDE.md` — Architecture patterns shared across all AI extensions
 
 ## License
 

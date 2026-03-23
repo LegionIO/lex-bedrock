@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.2] - 2026-03-22
+
+### Changed
+- Add legion-cache, legion-crypt, legion-data, legion-json, legion-logging, legion-settings, legion-transport runtime dependencies to gemspec
+- Replace bare spec_helper stub with real sub-gem helper requires and Helpers::Lex module with all 7 includes plus actor stubs
+
 ## [0.1.0] - 2026-03-21
 
 ### Added
