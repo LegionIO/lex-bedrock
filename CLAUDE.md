@@ -10,7 +10,7 @@ Legion Extension that connects LegionIO to AWS Bedrock for foundation model infe
 
 **GitHub**: https://github.com/LegionIO/lex-bedrock
 **License**: MIT
-**Version**: 0.1.0
+**Version**: 0.1.2
 **Specs**: 38 examples
 
 ## Architecture
