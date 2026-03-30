@@ -8,7 +8,7 @@ module Legion
     module Bedrock
       module Runners
         module Invoke
-          def invoke_model(model_id:, body:, access_key_id:, secret_access_key:, # rubocop:disable Metrics/ParameterLists
+          def invoke_model(model_id:, body:, access_key_id:, secret_access_key:,
                            content_type: 'application/json', accept: 'application/json',
                            region: Helpers::Client::DEFAULT_REGION, **)
             client = Helpers::Client.bedrock_runtime_client(
@@ -30,8 +30,8 @@ module Legion
             }
           end
 
-          include Legion::Extensions::Helpers::Lex if Legion::Extensions.const_defined?(:Helpers) &&
-                                                      Legion::Extensions::Helpers.const_defined?(:Lex)
+          include Legion::Extensions::Helpers::Lex if Legion::Extensions.const_defined?(:Helpers, false) &&
+                                                      Legion::Extensions::Helpers.const_defined?(:Lex, false)
         end
       end
     end
