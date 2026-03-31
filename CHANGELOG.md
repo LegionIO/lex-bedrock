@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.1] - 2026-03-31
+
+### Added
+- `Helpers::Usage` — standardized usage hash normalization from SDK structs (`normalize`) and parsed JSON (`from_json`)
+- `Runners::Invoke#invoke_model` now returns a `usage:` key with standardized token counts extracted from the response body
+
+### Changed
+- `Runners::Converse#create` returns `usage:` as a plain hash (`{ input_tokens:, output_tokens:, cache_read_tokens:, cache_write_tokens: }`) instead of raw SDK struct
+- `Runners::Converse#create_stream` returns the same standardized usage hash
+- `Runners::Invoke#invoke_model` wrapped in `Helpers::Errors.with_retry` for production reliability
+
 ## [0.2.0] - 2026-03-31
 
 ### Added
