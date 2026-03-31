@@ -59,6 +59,18 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Converse do
       expect(result).to have_key(:stop_reason)
     end
 
+    it 'returns standardized usage hash' do
+      result = instance.create_stream(
+        model_id:, messages:, access_key_id:, secret_access_key:
+      )
+      expect(result[:usage]).to eq({
+                                     input_tokens:       5,
+                                     output_tokens:      10,
+                                     cache_read_tokens:  0,
+                                     cache_write_tokens: 0
+                                   })
+    end
+
     it 'accumulates delta text into result' do
       result = instance.create_stream(
         model_id:, messages:, access_key_id:, secret_access_key:

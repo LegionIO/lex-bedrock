@@ -156,15 +156,19 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Converse do
       )
     end
 
-    it 'returns the usage object from the response' do
+    it 'returns standardized usage hash from the response' do
       result = instance.create(
         model_id:          model_id,
         messages:          messages,
         access_key_id:     access_key_id,
         secret_access_key: secret_access_key
       )
-      expect(result[:usage].input_tokens).to eq(10)
-      expect(result[:usage].output_tokens).to eq(20)
+      expect(result[:usage]).to eq({
+                                     input_tokens:       10,
+                                     output_tokens:      20,
+                                     cache_read_tokens:  0,
+                                     cache_write_tokens: 0
+                                   })
     end
 
     it 'does not include temperature in inference_config when temperature is nil' do
