@@ -8,7 +8,7 @@ module Legion
     module Bedrock
       module Runners
         module Tokens
-          def count_tokens(model_id:, messages:, access_key_id:, secret_access_key:,
+          def count_tokens(model_id:, messages:, access_key_id:, secret_access_key:, # rubocop:disable Metrics/ParameterLists
                            system: nil, tools: nil, anthropic_version: 'bedrock-2023-05-31',
                            anthropic_beta: nil, thinking: nil,
                            region: Helpers::Client::DEFAULT_REGION, **)
@@ -31,16 +31,16 @@ module Legion
 
           private
 
-          def build_count_tokens_request(model_id:, messages:, system:, tools:, # rubocop:disable Metrics/ParameterLists
+          def build_count_tokens_request(model_id:, messages:, system:, tools:,
                                          anthropic_version:, anthropic_beta:, thinking:)
             body_fields = { anthropic_version: }
             body_fields[:anthropic_beta] = anthropic_beta if anthropic_beta
-            body_fields[:thinking]       = thinking        if thinking
+            body_fields[:thinking]       = thinking if thinking
 
             request = {
               model_id:,
               messages:,
-              system:            system ? [{ text: system }] : nil,
+              system:                          system ? [{ text: system }] : nil,
               additional_model_request_fields: body_fields
             }
             request[:tools] = tools if tools

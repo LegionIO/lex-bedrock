@@ -41,7 +41,7 @@ module Legion
 
             settings_region = begin
               Legion::Settings[:bedrock]&.dig(:model_regions, model_id.to_sym)
-            rescue StandardError
+            rescue StandardError => _e
               nil
             end
 

@@ -21,7 +21,7 @@ RSpec.describe Legion::Extensions::Bedrock::Helpers::Credentials do
       creds = described_class.resolve(
         access_key_id:,
         secret_access_key:,
-        session_token: 'tok-abc'
+        session_token:     'tok-abc'
       )
       expect(creds.session_token).to eq('tok-abc')
     end

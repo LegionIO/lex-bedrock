@@ -41,7 +41,7 @@ module Legion
 
           def resolve_profile_id(canonical_model_id:, access_key_id:, secret_access_key:,
                                  region: Helpers::Client::DEFAULT_REGION, **)
-            result  = list_inference_profiles(
+            result = list_inference_profiles(
               access_key_id:, secret_access_key:, region:
             )
             profiles = result[:inference_profiles]

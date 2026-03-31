@@ -28,7 +28,7 @@ module Legion
           def sanitize_inference_config(inference_config:, thinking_enabled:)
             return inference_config unless thinking_enabled
 
-            inference_config.reject { |k, _| k == :temperature }
+            inference_config.except(:temperature)
           end
         end
       end

@@ -7,7 +7,7 @@ module Legion
         module Credentials
           CREDENTIAL_TTL = 3000 # seconds — refresh before the typical 1-hour STS TTL
 
-          @credential_cache = {}
+          @credential_cache = {} # rubocop:disable ThreadSafety/MutableClassInstanceVariable
           @cache_mutex      = ::Mutex.new
 
           module_function
@@ -26,7 +26,7 @@ module Legion
                     secret_access_key:,
                     session_token:
                   ),
-                  fetched_at: ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+                  fetched_at:  ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
                 }
               end
               @credential_cache[cache_key][:credentials]

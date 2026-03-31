@@ -88,7 +88,7 @@ module Legion
             }
           end
 
-          def create_with_thinking(model_id:, messages:, access_key_id:, secret_access_key:,
+          def create_with_thinking(model_id:, messages:, access_key_id:, secret_access_key:, # rubocop:disable Metrics/ParameterLists
                                    budget_tokens: nil, adaptive: false, extra_betas: [],
                                    system: nil, max_tokens: 16_000,
                                    region: Helpers::Client::DEFAULT_REGION, **opts)
@@ -126,7 +126,7 @@ module Legion
               messages:,
               inference_config:
             }
-            request[:system]                            = [{ text: system }]          if system
+            request[:system]                            = [{ text: system }] if system
             request[:tool_config]                       = tool_config                  if tool_config
             request[:guardrail_config]                  = guardrail_config             if guardrail_config
             request[:additional_model_request_fields]   = additional_model_request_fields \

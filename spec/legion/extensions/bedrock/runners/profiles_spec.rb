@@ -16,9 +16,9 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Profiles do
 
   let(:profile_summary) do
     double('profile_summary',
-           inference_profile_id: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+           inference_profile_id:   'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
            inference_profile_name: 'Claude 3.7 Sonnet US Cross-Region',
-           models: [double('model', model_arn: 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-7-sonnet-20250219-v1:0')])
+           models:                 [double('model', model_arn: 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-7-sonnet-20250219-v1:0')])
   end
 
   let(:list_response) do

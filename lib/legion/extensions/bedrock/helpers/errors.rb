@@ -45,10 +45,10 @@ module Legion
             throttling_error?(exception)
           end
 
-          def with_retry(max_retries: MAX_RETRIES, &block)
+          def with_retry(max_retries: MAX_RETRIES)
             attempts = 0
             begin
-              block.call
+              yield
             rescue StandardError => e
               attempts += 1
               raise unless retryable?(e) && attempts <= max_retries
