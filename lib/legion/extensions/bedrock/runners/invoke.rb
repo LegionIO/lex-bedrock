@@ -2,6 +2,8 @@
 
 require 'json'
 require 'legion/extensions/bedrock/helpers/client'
+require 'legion/extensions/bedrock/helpers/errors'
+require 'legion/extensions/bedrock/helpers/usage'
 
 module Legion
   module Extensions
@@ -12,21 +14,25 @@ module Legion
                            content_type: 'application/json', accept: 'application/json',
                            region: Helpers::Client::DEFAULT_REGION, **)
             client = Helpers::Client.bedrock_runtime_client(
-              access_key_id:     access_key_id,
-              secret_access_key: secret_access_key,
-              region:            region
+              access_key_id:,
+              secret_access_key:,
+              region:
             )
 
-            response = client.invoke_model(
-              model_id:     model_id,
-              body:         ::JSON.dump(body),
-              content_type: content_type,
-              accept:       accept
-            )
+            response = Helpers::Errors.with_retry do
+              client.invoke_model(
+                model_id:,
+                body:         ::JSON.dump(body),
+                content_type:,
+                accept:
+              )
+            end
 
+            parsed = ::JSON.parse(response.body.read)
             {
-              result:       ::JSON.parse(response.body.read),
-              content_type: response.content_type
+              result:       parsed,
+              content_type: response.content_type,
+              usage:        Helpers::Usage.from_json(parsed)
             }
           end
 

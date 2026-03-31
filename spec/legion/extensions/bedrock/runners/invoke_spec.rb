@@ -34,7 +34,7 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Invoke do
   end
 
   describe '#invoke_model' do
-    it 'returns parsed result and content_type' do
+    it 'returns parsed result, content_type, and usage' do
       result = instance.invoke_model(
         model_id:          model_id,
         body:              body,
@@ -44,8 +44,52 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Invoke do
 
       expect(result).to have_key(:result)
       expect(result).to have_key(:content_type)
+      expect(result).to have_key(:usage)
       expect(result[:result]['completion']).to eq('Hello there!')
       expect(result[:content_type]).to eq('application/json')
+    end
+
+    it 'returns zero-filled usage when response has no usage key' do
+      result = instance.invoke_model(
+        model_id:          model_id,
+        body:              body,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+
+      expect(result[:usage]).to eq({
+                                     input_tokens:       0,
+                                     output_tokens:      0,
+                                     cache_read_tokens:  0,
+                                     cache_write_tokens: 0
+                                   })
+    end
+
+    it 'extracts usage from response body when present' do
+      body_with_usage = JSON.dump({
+                                    completion: 'Hi',
+                                    usage:      { input_tokens: 8, output_tokens: 16 }
+                                  })
+      response_with_usage = instance_double(
+        'Aws::BedrockRuntime::Types::InvokeModelResponse',
+        body:         StringIO.new(body_with_usage),
+        content_type: 'application/json'
+      )
+      allow(runtime_double).to receive(:invoke_model).and_return(response_with_usage)
+
+      result = instance.invoke_model(
+        model_id:          model_id,
+        body:              body,
+        access_key_id:     access_key_id,
+        secret_access_key: secret_access_key
+      )
+
+      expect(result[:usage]).to eq({
+                                     input_tokens:       8,
+                                     output_tokens:      16,
+                                     cache_read_tokens:  0,
+                                     cache_write_tokens: 0
+                                   })
     end
 
     it 'passes model_id and serialized body to aws invoke_model' do

@@ -3,6 +3,7 @@
 require 'legion/extensions/bedrock/helpers/client'
 require 'legion/extensions/bedrock/helpers/errors'
 require 'legion/extensions/bedrock/helpers/thinking'
+require 'legion/extensions/bedrock/helpers/usage'
 
 module Legion
   module Extensions
@@ -30,7 +31,7 @@ module Legion
             response = Helpers::Errors.with_retry { client.converse(**request) }
             {
               result:      response.output,
-              usage:       response.usage,
+              usage:       Helpers::Usage.normalize(response.usage),
               stop_reason: response.stop_reason
             }
           end
@@ -83,7 +84,7 @@ module Legion
 
             {
               result:      accumulated_text,
-              usage:       final_usage,
+              usage:       Helpers::Usage.normalize(final_usage),
               stop_reason: final_stop
             }
           end
