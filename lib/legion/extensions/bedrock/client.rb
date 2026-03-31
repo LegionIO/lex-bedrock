@@ -4,6 +4,8 @@ require 'legion/extensions/bedrock/helpers/client'
 require 'legion/extensions/bedrock/runners/models'
 require 'legion/extensions/bedrock/runners/converse'
 require 'legion/extensions/bedrock/runners/invoke'
+require 'legion/extensions/bedrock/runners/tokens'
+require 'legion/extensions/bedrock/runners/profiles'
 
 module Legion
   module Extensions
@@ -12,6 +14,8 @@ module Legion
         include Legion::Extensions::Bedrock::Runners::Models
         include Legion::Extensions::Bedrock::Runners::Converse
         include Legion::Extensions::Bedrock::Runners::Invoke
+        include Legion::Extensions::Bedrock::Runners::Tokens
+        include Legion::Extensions::Bedrock::Runners::Profiles
 
         attr_reader :config
 

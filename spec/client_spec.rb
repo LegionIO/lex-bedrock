@@ -35,6 +35,16 @@ RSpec.describe Legion::Extensions::Bedrock::Client do
     expect(client).to respond_to(:invoke_model)
   end
 
+  it 'responds to tokens runner methods' do
+    expect(client).to respond_to(:count_tokens)
+  end
+
+  it 'responds to profiles runner methods' do
+    expect(client).to respond_to(:list_inference_profiles)
+    expect(client).to respond_to(:get_inference_profile)
+    expect(client).to respond_to(:resolve_profile_id)
+  end
+
   it 'stores extra opts in config' do
     c = described_class.new(
       access_key_id:     access_key_id,
