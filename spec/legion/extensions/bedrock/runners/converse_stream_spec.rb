@@ -187,4 +187,54 @@ RSpec.describe Legion::Extensions::Bedrock::Runners::Converse do
       instance.create(model_id:, messages:, access_key_id:, secret_access_key:, top_k: 40)
     end
   end
+
+  describe '#create_with_thinking' do
+    let(:output_double) { instance_double('Aws::BedrockRuntime::Types::ConverseOutput') }
+    let(:usage_double) do
+      instance_double('Aws::BedrockRuntime::Types::TokenUsage',
+                      input_tokens: 50, output_tokens: 200, total_tokens: 250)
+    end
+    let(:thinking_response) do
+      instance_double('Aws::BedrockRuntime::Types::ConverseResponse',
+                      output: output_double, usage: usage_double, stop_reason: 'end_turn')
+    end
+
+    before { allow(runtime_double).to receive(:converse).and_return(thinking_response) }
+
+    it 'passes anthropic_beta with thinking beta' do
+      allow(runtime_double).to receive(:converse) do |**kwargs|
+        betas = kwargs[:additional_model_request_fields][:anthropic_beta]
+        expect(betas).to include('interleaved-thinking-2025-05-14')
+        thinking_response
+      end
+
+      instance.create_with_thinking(
+        model_id:, messages:, access_key_id:, secret_access_key:,
+        budget_tokens: 4000
+      )
+    end
+
+    it 'passes thinking config with budget_tokens' do
+      allow(runtime_double).to receive(:converse) do |**kwargs|
+        thinking = kwargs[:additional_model_request_fields][:thinking]
+        expect(thinking).to eq({ type: 'enabled', budget_tokens: 4000 })
+        thinking_response
+      end
+
+      instance.create_with_thinking(
+        model_id:, messages:, access_key_id:, secret_access_key:,
+        budget_tokens: 4000
+      )
+    end
+
+    it 'passes adaptive thinking when no budget_tokens given' do
+      allow(runtime_double).to receive(:converse) do |**kwargs|
+        thinking = kwargs[:additional_model_request_fields][:thinking]
+        expect(thinking[:type]).to eq('adaptive')
+        thinking_response
+      end
+
+      instance.create_with_thinking(model_id:, messages:, access_key_id:, secret_access_key:)
+    end
+  end
 end

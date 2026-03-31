@@ -2,6 +2,7 @@
 
 require 'legion/extensions/bedrock/helpers/client'
 require 'legion/extensions/bedrock/helpers/errors'
+require 'legion/extensions/bedrock/helpers/thinking'
 
 module Legion
   module Extensions
@@ -85,6 +86,28 @@ module Legion
               usage:       final_usage,
               stop_reason: final_stop
             }
+          end
+
+          def create_with_thinking(model_id:, messages:, access_key_id:, secret_access_key:,
+                                   budget_tokens: nil, adaptive: false, extra_betas: [],
+                                   system: nil, max_tokens: 16_000,
+                                   region: Helpers::Client::DEFAULT_REGION, **opts)
+            thinking_fields = Helpers::Thinking.build_thinking_fields(
+              budget_tokens:, adaptive:, extra_betas:
+            )
+
+            # Merge with any caller-supplied additional_model_request_fields
+            amrf = opts.delete(:additional_model_request_fields) || {}
+            merged_amrf = thinking_fields.merge(amrf) do |_key, thinking_val, caller_val|
+              thinking_val.is_a?(Array) ? thinking_val | Array(caller_val) : caller_val
+            end
+
+            create(
+              model_id:, messages:, access_key_id:, secret_access_key:,
+              system:, max_tokens:, region:,
+              additional_model_request_fields: merged_amrf,
+              **opts
+            )
           end
 
           private
