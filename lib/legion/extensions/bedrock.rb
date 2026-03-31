@@ -2,6 +2,7 @@
 
 require 'legion/extensions/bedrock/version'
 require 'legion/extensions/bedrock/helpers/client'
+require 'legion/extensions/bedrock/helpers/errors'
 require 'legion/extensions/bedrock/runners/models'
 require 'legion/extensions/bedrock/runners/converse'
 require 'legion/extensions/bedrock/runners/invoke'
