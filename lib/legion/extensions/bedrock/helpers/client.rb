@@ -32,6 +32,22 @@ module Legion
             )
           end
 
+          def region_for_model(model_id:, region: nil)
+            return region if region
+
+            env_key = "BEDROCK_REGION_#{model_id.upcase.gsub(/[^A-Z0-9]/, '_')}"
+            env_val = ENV.fetch(env_key, nil)
+            return env_val if env_val
+
+            settings_region = begin
+              Legion::Settings[:bedrock]&.dig(:model_regions, model_id.to_sym)
+            rescue StandardError
+              nil
+            end
+
+            settings_region || DEFAULT_REGION
+          end
+
           def build_credentials(access_key_id:, secret_access_key:, session_token:)
             return nil if access_key_id.nil?
 

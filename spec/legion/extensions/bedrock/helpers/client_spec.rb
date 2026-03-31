@@ -88,4 +88,24 @@ RSpec.describe Legion::Extensions::Bedrock::Helpers::Client do
       expect(client.config.region).to eq(described_class::DEFAULT_REGION)
     end
   end
+
+  describe '.region_for_model' do
+    after { ENV.delete('BEDROCK_REGION_TEST_MODEL') }
+
+    it 'returns the explicit region when provided' do
+      result = described_class.region_for_model(model_id: 'test-model', region: 'eu-west-1')
+      expect(result).to eq('eu-west-1')
+    end
+
+    it 'returns the env var region when set' do
+      ENV['BEDROCK_REGION_TEST_MODEL'] = 'ap-southeast-1'
+      result = described_class.region_for_model(model_id: 'test-model')
+      expect(result).to eq('ap-southeast-1')
+    end
+
+    it 'returns DEFAULT_REGION when no override exists' do
+      result = described_class.region_for_model(model_id: 'unknown-model')
+      expect(result).to eq(described_class::DEFAULT_REGION)
+    end
+  end
 end
