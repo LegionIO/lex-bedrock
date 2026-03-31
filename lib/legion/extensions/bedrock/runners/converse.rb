@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'legion/extensions/bedrock/helpers/client'
+require 'legion/extensions/bedrock/helpers/errors'
 
 module Legion
   module Extensions
@@ -9,29 +10,112 @@ module Legion
         module Converse
           def create(model_id:, messages:, access_key_id:, secret_access_key:, # rubocop:disable Metrics/ParameterLists
                      system: nil, max_tokens: 1024, temperature: nil,
+                     top_p: nil, top_k: nil, stop_sequences: nil,
+                     tool_config: nil, guardrail_config: nil,
+                     additional_model_request_fields: nil,
                      region: Helpers::Client::DEFAULT_REGION, **)
             client = Helpers::Client.bedrock_runtime_client(
-              access_key_id:     access_key_id,
-              secret_access_key: secret_access_key,
-              region:            region
+              access_key_id:,
+              secret_access_key:,
+              region:
             )
 
-            inference_config = { max_tokens: max_tokens }
-            inference_config[:temperature] = temperature if temperature
+            request = build_converse_request(
+              model_id:, messages:, system:, max_tokens:, temperature:,
+              top_p:, top_k:, stop_sequences:, tool_config:,
+              guardrail_config:, additional_model_request_fields:
+            )
 
-            request = {
-              model_id:         model_id,
-              messages:         messages,
-              inference_config: inference_config
-            }
-            request[:system] = [{ text: system }] if system
-
-            response = client.converse(**request)
+            response = Helpers::Errors.with_retry { client.converse(**request) }
             {
               result:      response.output,
               usage:       response.usage,
               stop_reason: response.stop_reason
             }
+          end
+
+          def create_stream(model_id:, messages:, access_key_id:, secret_access_key:, # rubocop:disable Metrics/ParameterLists
+                            system: nil, max_tokens: 1024, temperature: nil,
+                            top_p: nil, top_k: nil, stop_sequences: nil,
+                            tool_config: nil, guardrail_config: nil,
+                            additional_model_request_fields: nil,
+                            region: Helpers::Client::DEFAULT_REGION, **,
+                            &block)
+            client = Helpers::Client.bedrock_runtime_client(
+              access_key_id:,
+              secret_access_key:,
+              region:
+            )
+
+            request = build_converse_request(
+              model_id:, messages:, system:, max_tokens:, temperature:,
+              top_p:, top_k:, stop_sequences:, tool_config:,
+              guardrail_config:, additional_model_request_fields:
+            )
+
+            accumulated_text = +''
+            final_usage      = nil
+            final_stop       = nil
+
+            Helpers::Errors.with_retry do
+              client.converse_stream(**request) do |stream|
+                stream.on_content_block_delta_event do |event|
+                  delta = event.delta
+                  text  = delta.respond_to?(:text) ? delta.text : nil
+                  next if text.nil?
+
+                  accumulated_text << text
+                  block&.call(type: :delta, text:)
+                end
+
+                stream.on_message_stop_event do |event|
+                  final_stop = event.stop_reason
+                  block&.call(type: :stop, stop_reason: final_stop)
+                end
+
+                stream.on_metadata_event do |event|
+                  final_usage = event.usage
+                  block&.call(type: :usage, usage: final_usage)
+                end
+              end
+            end
+
+            {
+              result:      accumulated_text,
+              usage:       final_usage,
+              stop_reason: final_stop
+            }
+          end
+
+          private
+
+          def build_converse_request(model_id:, messages:, system:, max_tokens:, # rubocop:disable Metrics/ParameterLists
+                                     temperature:, top_p:, top_k:, stop_sequences:,
+                                     tool_config:, guardrail_config:,
+                                     additional_model_request_fields:)
+            inference_config = { max_tokens: }
+            inference_config[:temperature]    = temperature    if temperature
+            inference_config[:top_p]          = top_p          if top_p
+            inference_config[:stop_sequences] = stop_sequences if stop_sequences
+
+            request = {
+              model_id:,
+              messages:,
+              inference_config:
+            }
+            request[:system]                            = [{ text: system }]          if system
+            request[:tool_config]                       = tool_config                  if tool_config
+            request[:guardrail_config]                  = guardrail_config             if guardrail_config
+            request[:additional_model_request_fields]   = additional_model_request_fields \
+              if additional_model_request_fields
+
+            # top_k goes in additional_model_request_fields for Anthropic models
+            if top_k
+              request[:additional_model_request_fields] ||= {}
+              request[:additional_model_request_fields][:top_k] = top_k
+            end
+
+            request
           end
 
           include Legion::Extensions::Helpers::Lex if Legion::Extensions.const_defined?(:Helpers, false) &&

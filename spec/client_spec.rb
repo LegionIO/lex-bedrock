@@ -28,6 +28,7 @@ RSpec.describe Legion::Extensions::Bedrock::Client do
 
   it 'responds to converse runner methods' do
     expect(client).to respond_to(:create)
+    expect(client).to respond_to(:create_stream)
   end
 
   it 'responds to invoke runner methods' do
