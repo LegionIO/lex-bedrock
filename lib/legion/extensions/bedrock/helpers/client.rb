@@ -15,21 +15,17 @@ module Legion
           def bedrock_runtime_client(access_key_id: nil, secret_access_key: nil,
                                      region: DEFAULT_REGION, session_token: nil,
                                      credentials: nil, **)
-            Aws::BedrockRuntime::Client.new(
-              region:,
-              credentials: credentials || build_credentials(access_key_id:, secret_access_key:,
-                                                            session_token:)
-            )
+            credentials ||= build_credentials(access_key_id:, secret_access_key:, session_token:)
+            credentials ||= resolve_broker_credentials
+            Aws::BedrockRuntime::Client.new(region:, credentials:)
           end
 
           def bedrock_client(access_key_id: nil, secret_access_key: nil,
                              region: DEFAULT_REGION, session_token: nil,
                              credentials: nil, **)
-            Aws::Bedrock::Client.new(
-              region:,
-              credentials: credentials || build_credentials(access_key_id:, secret_access_key:,
-                                                            session_token:)
-            )
+            credentials ||= build_credentials(access_key_id:, secret_access_key:, session_token:)
+            credentials ||= resolve_broker_credentials
+            Aws::Bedrock::Client.new(region:, credentials:)
           end
 
           def region_for_model(model_id:, region: nil)
@@ -48,6 +44,18 @@ module Legion
             settings_region || DEFAULT_REGION
           end
 
+          def resolve_broker_credentials
+            return nil unless defined?(Legion::Identity::Broker)
+
+            renewer = Legion::Identity::Broker.renewer_for(:aws)
+            return nil unless renewer&.provider.respond_to?(:current_credentials)
+
+            renewer.provider.current_credentials
+          rescue StandardError => e
+            log.warn("resolve_broker_credentials failed: #{e.message}")
+            nil
+          end
+
           def build_credentials(access_key_id:, secret_access_key:, session_token:)
             return nil if access_key_id.nil?
 
@@ -58,7 +66,7 @@ module Legion
             end
           end
 
-          private_class_method :build_credentials
+          private_class_method :build_credentials, :resolve_broker_credentials
         end
       end
     end

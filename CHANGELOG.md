@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Broker soft consumer in Helpers::Client for AWS credential resolution via Identity::Broker (Phase 8 Wave 2)
+
 ## [0.2.1] - 2026-03-31
 
 ### Added
